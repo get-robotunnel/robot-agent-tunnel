@@ -1,6 +1,6 @@
-# RoboTunnel Daemon IPC Protocol — v0.1
+# RoboTunnel Daemon IPC Protocol — v0.2
 
-Status: **Draft** · License: Apache-2.0
+Status: **Stable** · License: Apache-2.0
 
 This document defines the local IPC protocol between a **daemon** (`robotunneld`)
 and **agent processes** (in any language) running on the same machine.
@@ -39,7 +39,7 @@ the message type. Additional fields depend on the op.
 
 | op | Required fields | Optional fields | Meaning |
 |----|----------------|-----------------|---------|
-| `listen` | `agent_id` | `registry_token` | Register as a responder on the daemon's TCP port. |
+| `listen` | `agent_id` | `registry_token`, `tunnel_endpoint` | Register as a responder on the daemon's TCP port. |
 | `unlisten` | — | — | Deregister responder (Phase A: no-op). |
 | `dial` | `target_agent_id`, `stream_class` | `request_id` | Connect to a remote agent. Phase A: `target_agent_id` is `host:port`. |
 | `send` | `stream_id`, `data` | — | Send base64-encoded bytes on a stream. |
@@ -48,12 +48,17 @@ the message type. Additional fields depend on the op.
 
 #### `listen`
 ```json
-{"op":"listen","agent_id":"agt_B","registry_token":"tok_..."}
+{"op":"listen","agent_id":"agt_B","registry_token":"<64-hex-Ed25519-seed>","tunnel_endpoint":"1.2.3.4:11411"}
 ```
 Causes the daemon to start listening for inbound TCP tunnel connections (idempotent).
-The daemon will send `incoming` notifications to this IPC client for each new inbound
-connection. `registry_token` is required in Phase B for the daemon to register the
-`tunnel_endpoint` in the registry; ignored in Phase A.
+The daemon sends `incoming` notifications to this IPC client for each new inbound
+connection.
+
+- `registry_token` — hex-encoded Ed25519 seed (32 bytes = 64 hex chars) used for
+  Agent-Signature heartbeats. When present, the daemon spawns a background heartbeat
+  loop that keeps `tunnel_endpoint` current in the registry.
+- `tunnel_endpoint` — explicit `host:port` to publish in the registry. If omitted,
+  the daemon detects its local IP automatically.
 
 #### `dial`
 ```json
@@ -61,8 +66,9 @@ connection. `registry_token` is required in Phase B for the daemon to register t
 ```
 `stream_class` values: `"control"` (default), `"meta"`, `"bulk"`.
 
-In Phase A, `target_agent_id` is parsed as `host:port`. In Phase B it will be a
-registry `agent_id` (`agt_xxx`) and the daemon resolves it via `rt-resolver`.
+In Phase A/direct mode, `target_agent_id` is parsed as `host:port`. Starting in
+Phase B, an `agt_xxx` target is resolved by `rt-resolver` via the registry
+discovery API before dialing.
 
 #### `send`
 ```json
@@ -140,12 +146,18 @@ ack. Responder-side IPC `stream_id` is derived from this wire value.
 |---------|---------|---------|
 | `RT_DAEMON_SOCKET` | `/var/run/robotunnel/rt.sock` | IPC socket path. |
 | `RT_DAEMON_LISTEN_PORT` | `11411` | TCP port for inbound tunnel connections. |
-| `RT_DAEMON_INSECURE` | `true` | Accept any valid Ed25519 key (Phase A). Set to `false` in production with an allowlist. |
+| `RT_DAEMON_INSECURE` | `true` | Accept any valid Ed25519 key (dev). Set `false` in production with an allowlist. |
+| `RT_REGISTRY_URL` | — | Phase B: registry base URL (e.g. `https://reg.robotunnel.io`). |
+| `RT_DAEMON_USE_MUX` | `true` | Phase C: use multiplexed connections (StreamOpen/Data/Close frames). |
+| `RT_HEARTBEAT_INTERVAL_SECS` | `30` | Registry heartbeat interval in seconds. |
 
 ---
 
 ## 6. Versioning
 
-This is IPC protocol **v0.1** (Phase A). It will evolve as:
-- **v0.2**: `dial` accepts registry `agent_id`; daemon performs registry lookup.
-- **v0.3**: `stream_class` QoS scheduling aligns with tunnel protocol v0.3 streams.
+This is IPC protocol **v0.2** (Phases A + B + C implemented).
+
+Changes from v0.1:
+- `listen` gains optional `registry_token` and `tunnel_endpoint` fields (Phase B).
+- `dial` `target_agent_id` can now be an `agt_xxx` registry ID (Phase B).
+- `stream_class` QoS aligns with tunnel protocol v0.3 (`StreamOpen`/`StreamData`/`StreamClose`) — scheduling is handled transparently by the daemon (Phase C).

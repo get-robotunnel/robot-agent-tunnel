@@ -1616,10 +1616,28 @@ name = "rt-daemon"
 version = "0.1.0"
 dependencies = [
  "base64",
+ "hex",
  "rt-core",
+ "rt-resolver",
  "serde",
  "serde_json",
  "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "rt-resolver"
+version = "0.1.0"
+dependencies = [
+ "ed25519-dalek",
+ "hex",
+ "rand 0.8.6",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2",
  "thiserror 2.0.18",
  "tokio",
  "tracing",

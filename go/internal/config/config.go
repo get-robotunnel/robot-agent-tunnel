@@ -18,6 +18,7 @@ type Config struct {
 	OpsInternalURL   string // ops internal API base, e.g. http://127.0.0.1:8080
 	InternalSecret   string // shared secret for the ops<->tunnel internal API
 	OfflineAfterSecs int    // heartbeat staleness window; default 60
+	RegistryURL      string // robot-agent-registry base URL (optional; enables /mcp/:agent_id proxy)
 }
 
 // Load reads configuration from environment variables and applies defaults.
@@ -38,6 +39,7 @@ func Load() (*Config, error) {
 		OpsInternalURL:   getenv("OPS_INTERNAL_URL", "http://127.0.0.1:8080"),
 		InternalSecret:   os.Getenv("INTERNAL_API_SECRET"),
 		OfflineAfterSecs: getenvInt("HEARTBEAT_OFFLINE_SECS", 60),
+		RegistryURL:      os.Getenv("REGISTRY_URL"),
 	}
 	if c.InternalSecret == "" {
 		return nil, errors.New("INTERNAL_API_SECRET is required")

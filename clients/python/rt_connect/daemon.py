@@ -85,10 +85,17 @@ class Daemon:
     async def __aexit__(self, *_) -> None:
         await self.close()
 
-    async def listen(self, agent_id: str, registry_token: Optional[str] = None) -> None:
+    async def listen(
+        self,
+        agent_id: str,
+        registry_token: Optional[str] = None,
+        tunnel_endpoint: Optional[str] = None,
+    ) -> None:
         msg: dict = {"op": "listen", "agent_id": agent_id}
         if registry_token:
             msg["registry_token"] = registry_token
+        if tunnel_endpoint:
+            msg["tunnel_endpoint"] = tunnel_endpoint
         await self._send_msg(msg)
         # Wait for the `listening` confirmation
         resp = await self._read_msg()

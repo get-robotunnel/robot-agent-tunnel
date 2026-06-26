@@ -1,4 +1,4 @@
-# RoboTunnel Tunnel Protocol — v0.2
+# RoboTunnel Tunnel Protocol — v0.3
 
 Status: **Stable (reference implementation)** · License: Apache-2.0
 
@@ -27,6 +27,8 @@ The reference implementations live in this repo:
 | **agent** | Robot-side runtime. Hosts a local TCP tunnel server and an outbound control-plane connection to the platform. | `robot_api_key` (per-robot, `X-Robot-API-Key`) |
 | **client** | CLI / browser / service initiating a debug or data session. | `platform_token` (Bearer) — issued by the Operations layer; the tunnel only validates a short-lived **relay session token** minted from it. |
 | **platform / relay** | The hosted tunnel service (`tunnel-svc`). Brokers signaling, issues TURN credentials, hosts the control plane (CP) and data-plane (DP) relay. | trusts agent `robot_api_key`; validates client relay session tokens. |
+| **initiator** | Daemon dialing a remote endpoint. | Ed25519 nonce-challenge (§3.1). |
+| **responder** | Daemon accepting a connection. | Verifies initiator's Ed25519 signature. |
 
 Connection identity (`robot_api_key`) is **independent** of business/user auth
 (`platform_token`). A self-hosted tunnel needs only the former.
@@ -85,10 +87,14 @@ After the handshake, every message is a length-prefixed frame:
 | `0x11` | `Pong` | both | keepalive reply. |
 | `0x20` | `WebRtcBootstrap` | platform → agent | JSON `{bootstrap_id, cli_public_ip?, cli_lan_cidr?, route_type?}`. |
 | `0x21` | `WebRtcTeardown` | platform → agent | JSON `{bootstrap_id?}`. |
-| `0x30` | `RelayOpen` | client → agent | Open a relay stream over the WebRTC datachannel. |
-| `0x31` | `RelayOpenAck` | agent → client | Relay open acknowledgement. |
+| `0x30` | `RelayOpen` | initiator → responder | Open a direct relay stream. Payload: `[stream_id:u32 BE][class:u8]`. |
+| `0x31` | `RelayOpenAck` | responder → initiator | Relay open acknowledgement (echo of RelayOpen payload). |
 | `0x32` | `RelayData` | both | Relay data chunk. |
 | `0x33` | `RelayClose` | both | Relay stream close. |
+| `0x40` | `StreamOpen` | initiator → responder | Open a multiplexed stream (v0.3). Payload: `[stream_id:u32 BE][class:u8]`. |
+| `0x41` | `StreamData` | both | Data on a multiplexed stream. Payload: `[stream_id:u32 BE][data…]`. |
+| `0x42` | `StreamClose` | both | Close a multiplexed stream. Payload: `[stream_id:u32 BE]`. |
+| `0x43` | `FlowControl` | both | Credit-based flow control (reserved). Payload: `[stream_id:u32 BE][credits:u32 BE]`. |
 
 ### 3.4 Legacy TunnelPacket body (`0x01`)
 
@@ -148,9 +154,48 @@ heartbeat recency (default TTL window), falling back to live CP connection state
 | `RT_WEBRTC_ENABLED` | `true` | Enable STUN/TURN path. |
 | `RT_AUTHORIZED_KEYS` | — | Comma-separated hex Ed25519 client keys. |
 
-## 8. Versioning
+## 8. Multiplexed connections (v0.3, Phase C)
 
-This is protocol **v0.2**. Frame-type bytes are stable and append-only; new
+When both daemons support v0.3, a single TCP connection carries N logical streams.
+The mode is detected by the first frame: `RelayOpen` (0x30) = per-stream mode;
+`StreamOpen` (0x40) = multiplexed mode.
+
+### Stream ID assignment
+
+- **Initiator** uses odd IDs: 1, 3, 5 …
+- **Responder** uses even IDs: 2, 4, 6 … (for responder-initiated streams, reserved).
+
+### QoS scheduling
+
+Outbound frames are enqueued by stream class:
+
+| Class | Byte | Queue |
+|-------|------|-------|
+| `control` | `0x01` | high-priority |
+| `meta`    | `0x02` | high-priority |
+| `bulk`    | `0x03` | low-priority |
+
+The write task drains the high-priority queue completely before serving bulk. A
+`biased tokio::select!` ensures control frames win when both queues become ready
+simultaneously.
+
+### Connection pooling
+
+Each daemon maintains one mux connection per remote `host:port` (outbound pool).
+New streams over the same endpoint reuse the existing TCP connection without
+re-authentication.
+
+---
+
+## 9. Versioning
+
+This is protocol **v0.3**. Frame-type bytes are stable and append-only; new
 frame types take unused byte values. Breaking changes bump the minor version and
 are negotiated out-of-band (via the agent build channel) until an in-band
 version handshake is added.
+
+Changes from v0.2:
+- Added `initiator` and `responder` roles for daemon-to-daemon connections.
+- Added `StreamOpen` (0x40), `StreamData` (0x41), `StreamClose` (0x42),
+  `FlowControl` (0x43) frames for multiplexed mode.
+- Mode detection via first frame: 0x30 → direct relay; 0x40 → multiplexed.

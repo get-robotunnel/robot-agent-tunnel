@@ -108,6 +108,13 @@ func main() {
 	// to a robot over its control channel, and query connection liveness.
 	registerInternalAPI(r, cfg.InternalSecret, relaySvc.Hub())
 
+	// MCP reverse-proxy: /mcp/:agent_id routes incoming MCP tool calls to the
+	// agent's registered mcp_endpoint (looked up from REGISTRY_URL).
+	// Phase 2 will forward through the tunnel relay for NAT-traversed agents.
+	mcpProxy := newMCPProxyHandler(cfg.RegistryURL)
+	r.Any("/mcp/:agent_id", mcpProxy.handleMCPProxy)
+	r.Any("/mcp/:agent_id/*path", mcpProxy.handleMCPProxy)
+
 	addr := ":" + cfg.Port
 	log.Printf("[tunnel-svc] listening on %s (base=%s)", addr, cfg.BaseURL)
 	if err := r.Run(addr); err != nil {

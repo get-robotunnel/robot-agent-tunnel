@@ -26,17 +26,38 @@ async fn main() {
         .map(|v| matches!(v.to_lowercase().as_str(), "1" | "true" | "yes"))
         .unwrap_or(true);
 
+    // Phase B: optional registry URL for agent discovery / heartbeat
+    let registry_url = std::env::var("RT_REGISTRY_URL").ok();
+
+    // Phase C: multiplexed connections (default on)
+    let use_mux = std::env::var("RT_DAEMON_USE_MUX")
+        .map(|v| !matches!(v.to_lowercase().as_str(), "0" | "false" | "no"))
+        .unwrap_or(true);
+
+    let heartbeat_interval_secs: u64 = std::env::var("RT_HEARTBEAT_INTERVAL_SECS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(30);
+
     let config = DaemonConfig {
         listen_port,
         socket_path: socket_path.clone(),
         insecure_allow_any_client: insecure,
         auth_seed: [0u8; 32],
+        registry_url,
+        use_mux,
+        heartbeat_interval_secs,
     };
 
     let manager = Arc::new(DaemonManager::new(config));
     let server = IpcServer::new(socket_path.clone().into(), manager);
 
-    tracing::info!("robotunneld listening on socket={} tunnel_port={}", socket_path, listen_port);
+    tracing::info!(
+        "robotunneld socket={} tunnel_port={} use_mux={}",
+        socket_path,
+        listen_port,
+        use_mux,
+    );
 
     if let Err(e) = server.run().await {
         tracing::error!("daemon fatal error: {}", e);

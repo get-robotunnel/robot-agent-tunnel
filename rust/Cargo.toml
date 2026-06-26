@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/rt-core", "crates/rt-webrtc", "crates/rt-daemon", "bin/robotunneld"]
+members = ["crates/rt-core", "crates/rt-webrtc", "crates/rt-daemon", "crates/rt-resolver", "bin/robotunneld"]
 resolver = "2"
 
 # rt-webrtc depends on a vendored fork of webrtc-ice (ICE candidate gathering

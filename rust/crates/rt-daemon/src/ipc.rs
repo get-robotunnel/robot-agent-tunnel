@@ -61,8 +61,13 @@ pub enum AgentMsg {
     /// Register this agent as a responder on the daemon's TCP listener.
     Listen {
         agent_id: String,
+        /// Hex-encoded Ed25519 seed (64 chars) for registry Agent-Signature auth.
         #[serde(skip_serializing_if = "Option::is_none")]
         registry_token: Option<String>,
+        /// Explicit public host:port to advertise in registry heartbeats.
+        /// If omitted, daemon attempts local IP detection.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        tunnel_endpoint: Option<String>,
     },
     /// Deregister responder (no-op in Phase A).
     Unlisten,

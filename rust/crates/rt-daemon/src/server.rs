@@ -76,7 +76,11 @@ async fn handle_client(stream: UnixStream, manager: Arc<DaemonManager>) -> Resul
                 write_daemon_msg(&mut *w, &DaemonMsg::Pong).await?;
             }
 
-            AgentMsg::Listen { agent_id, .. } => {
+            AgentMsg::Listen {
+                agent_id,
+                registry_token,
+                tunnel_endpoint,
+            } => {
                 let mgr = manager.clone();
                 if let Err(e) = mgr.start_listener().await {
                     let mut w = writer.lock().await;
@@ -90,6 +94,13 @@ async fn handle_client(stream: UnixStream, manager: Arc<DaemonManager>) -> Resul
                     )
                     .await?;
                     continue;
+                }
+
+                // Phase B: start registry heartbeat if credentials were provided
+                if let Some(token) = registry_token {
+                    manager
+                        .start_registry_heartbeat(agent_id.clone(), token, tunnel_endpoint)
+                        .await;
                 }
 
                 // Forward incoming stream notifications to this IPC client

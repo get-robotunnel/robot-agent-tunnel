@@ -167,6 +167,15 @@ pub enum FrameType {
     RelayData = 0x32,
     /// Relay stream close signal.
     RelayClose = 0x33,
+    // v0.3 multiplexed stream frames (Phase C)
+    /// Open a multiplexed logical stream: [stream_id: u32 BE][class: u8]
+    StreamOpen = 0x40,
+    /// Data on a multiplexed stream: [stream_id: u32 BE][data…]
+    StreamData = 0x41,
+    /// Close a multiplexed stream: [stream_id: u32 BE]
+    StreamClose = 0x42,
+    /// Flow-control credit: [stream_id: u32 BE][credits: u32 BE]
+    FlowControl = 0x43,
 }
 
 impl TryFrom<u8> for FrameType {
@@ -185,6 +194,10 @@ impl TryFrom<u8> for FrameType {
             0x31 => Ok(FrameType::RelayOpenAck),
             0x32 => Ok(FrameType::RelayData),
             0x33 => Ok(FrameType::RelayClose),
+            0x40 => Ok(FrameType::StreamOpen),
+            0x41 => Ok(FrameType::StreamData),
+            0x42 => Ok(FrameType::StreamClose),
+            0x43 => Ok(FrameType::FlowControl),
             _ => Err(ProtocolError::InvalidPacket(format!(
                 "unknown frame type: 0x{:02x}",
                 value

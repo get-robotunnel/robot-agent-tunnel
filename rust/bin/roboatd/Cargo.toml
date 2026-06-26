@@ -1,18 +1,18 @@
 [package]
-name = "robotunneld"
+name = "roboatd"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-repository = "https://github.com/get-robotunnel/robot-agent-tunnel"
-description = "RoboTunnel daemon binary"
+repository = "https://github.com/get-robotunnel/roboat"
+description = "roboat daemon binary"
 
 [[bin]]
-name = "robotunneld"
+name = "roboatd"
 path = "src/main.rs"
 
 [dependencies]
-rt-daemon = { path = "../../crates/rt-daemon" }
-rt-core = { path = "../../crates/rt-core" }
+roboat-daemon = { path = "../../crates/roboat-daemon" }
+roboat-core = { path = "../../crates/roboat-core" }
 tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

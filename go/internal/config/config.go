@@ -35,7 +35,7 @@ func Load() (*Config, error) {
 		TurnHost:         os.Getenv("TURN_HOST"),
 		TurnSecret:       os.Getenv("TURN_SECRET"),
 		TurnAdvertiseTLS: getenvBool("TURN_ADVERTISE_TLS", true),
-		AgentAuthSeedHex: os.Getenv("RT_AGENT_AUTH_SEED_HEX"),
+		AgentAuthSeedHex: os.Getenv("ROBOAT_AGENT_AUTH_SEED_HEX"),
 		OpsInternalURL:   getenv("OPS_INTERNAL_URL", "http://127.0.0.1:8080"),
 		InternalSecret:   os.Getenv("INTERNAL_API_SECRET"),
 		OfflineAfterSecs: getenvInt("HEARTBEAT_OFFLINE_SECS", 60),

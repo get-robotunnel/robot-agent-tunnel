@@ -1,10 +1,10 @@
 [package]
-name = "rt-webrtc"
+name = "roboat-webrtc"
 version = "0.3.0"
 edition = "2021"
 license = "Apache-2.0"
-repository = "https://github.com/get-robotunnel/robotunnel-tunnel"
-description = "RoboTunnel WebRTC layer — STUN-first P2P with TURN fallback and TCP tunnel last resort"
+repository = "https://github.com/get-robotunnel/roboat"
+description = "roboat WebRTC layer — STUN-first P2P with TURN fallback and TCP tunnel last resort"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }

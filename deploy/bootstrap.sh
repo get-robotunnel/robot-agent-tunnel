@@ -8,11 +8,11 @@
 # manually during the cutover step so it can be staged and rolled back.
 set -euo pipefail
 
-APP_DIR=/opt/robotunnel-tunnel
+APP_DIR=/opt/roboat
 CONF="$APP_DIR/config/.env"
 
-id -u robotunnel >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin robotunnel
-install -d -o robotunnel -g robotunnel "$APP_DIR" "$APP_DIR/bin" "$APP_DIR/config"
+id -u roboat >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin roboat
+install -d -o roboat -g roboat "$APP_DIR" "$APP_DIR/bin" "$APP_DIR/config"
 
 if [ ! -f "$CONF" ]; then
   cat >"$CONF" <<'EOF'
@@ -25,15 +25,15 @@ TURN_HOST=turn.robotunnel.io
 TURN_SECRET=CHANGE_ME
 TURN_ADVERTISE_TLS=true
 # ed25519 seed for platform->agent auth (moved out of the ops .env).
-RT_AGENT_AUTH_SEED_HEX=CHANGE_ME
+ROBOAT_AGENT_AUTH_SEED_HEX=CHANGE_ME
 # ops internal API (localhost) + shared secret for the ops<->tunnel boundary.
 OPS_INTERNAL_URL=http://127.0.0.1:8080
 INTERNAL_API_SECRET=CHANGE_ME
 HEARTBEAT_OFFLINE_SECS=60
 EOF
   chmod 600 "$CONF"
-  chown robotunnel:robotunnel "$CONF"
-  echo "Wrote template $CONF — edit DATABASE_URL, TURN_SECRET, RT_AGENT_AUTH_SEED_HEX, INTERNAL_API_SECRET before starting."
+  chown roboat:roboat "$CONF"
+  echo "Wrote template $CONF — edit DATABASE_URL, TURN_SECRET, ROBOAT_AGENT_AUTH_SEED_HEX, INTERNAL_API_SECRET before starting."
 else
   echo "$CONF already exists; leaving it untouched."
 fi
@@ -46,5 +46,5 @@ if [ -f "$CADDYFILE" ] && ! grep -q "tunnel.robotunnel.io" "$CADDYFILE"; then
   echo "Added tunnel.robotunnel.io vhost to $CADDYFILE and reloaded Caddy."
 fi
 
-echo "Bootstrap done. Next: run setup.sh to install the binary, then 'systemctl start robotunnel-tunnel'."
+echo "Bootstrap done. Next: run setup.sh to install the binary, then 'systemctl start roboat'."
 echo "Cutover (api.robotunnel.io strangler) is a separate, staged manual step — see deploy/README.md."

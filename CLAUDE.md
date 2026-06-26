@@ -1,4 +1,4 @@
-# CLAUDE.md — RoboTunnel Tunnel (open-source connection layer)
+# CLAUDE.md — roboat (open-source connection layer)
 
 This repo is the **shared, open-source tunnel**: the connection layer extracted
 from the Operations platform and agent so that both Robot Operations and the
@@ -36,14 +36,14 @@ update the spec in the same change.
 
 ## Deploy
 
-`tunnel-svc` on `:8091`, systemd (`robotunnel` user), Caddy `tunnel.robotunnel.io`
+`tunnel-svc` on `:8091`, systemd (`roboat` user), Caddy `tunnel.robotunnel.io`
 plus a path-strangler on `api.robotunnel.io` so already-deployed agents cut over
 with no client change. Rollback = flip the Caddy routes back to ops `:8080`.
 Reference scripts in `deploy/`.
 
 ## Security
 
-Connection secrets (`RT_AGENT_AUTH_SEED_HEX`, `TURN_SECRET`, the tunnel
+Connection secrets (`ROBOAT_AGENT_AUTH_SEED_HEX`, `TURN_SECRET`, the tunnel
 `DATABASE_URL`, the internal-API shared secret) live in
-`/opt/robotunnel-tunnel/config/.env` (chmod 600), never in git. If you see live
+`/opt/roboat/config/.env` (chmod 600), never in git. If you see live
 secrets in any doc, flag for rotation — do not echo them.

@@ -1,4 +1,4 @@
-"""Async Daemon client — wraps the local robotunneld IPC socket."""
+"""Async Daemon client — wraps the local roboatd IPC socket."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from typing import AsyncIterator, Optional
 
 _HEADER = struct.Struct(">I")
 MAX_MSG_SIZE = 4 * 1024 * 1024
-DEFAULT_SOCKET = "/var/run/robotunnel/rt.sock"
+DEFAULT_SOCKET = "/var/run/roboat/roboatd.sock"
 
 
 class Stream:
@@ -42,7 +42,7 @@ class Stream:
 
 class Daemon:
     """
-    Thin async client for a local robotunneld IPC socket.
+    Thin async client for a local roboatd IPC socket.
 
     Usage::
 

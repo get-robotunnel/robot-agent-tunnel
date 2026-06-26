@@ -1,16 +1,16 @@
-# RoboTunnel Tunnel Protocol — v0.3
+# roboat Tunnel Protocol — v0.3
 
 Status: **Stable (reference implementation)** · License: Apache-2.0
 
-This document is the authoritative wire-protocol contract for the **RoboTunnel
-tunnel** — the open, shared connection layer that links a robot-side **agent** to
-a **client** (CLI, browser, or another service) over the public internet, with
-automatic path selection. It is the public-service contract that both
+This document is the authoritative wire-protocol contract for **roboat** — the
+open, shared connection layer that links a robot-side **agent** to a **client**
+(CLI, browser, or another service) over the public internet, with automatic path
+selection. It is the public-service contract that both
 [Robot Operations](https://ops.robotunnel.io) and the
 [Robot Agent Registry](https://reg.robotunnel.io) build on.
 
 The reference implementations live in this repo:
-- `rust/` — agent-side + client-side (crates `rt-connect-core`, `rt-connect-webrtc`)
+- `rust/` — agent-side + client-side (crates `roboat-core`, `roboat-webrtc`)
 - `go/`   — platform/relay-side (`cmd/tunnel-svc`, served at `tunnel.robotunnel.io`)
 
 > **Scope note.** This spec describes the protocol *as implemented today*. The
@@ -148,11 +148,11 @@ heartbeat recency (default TTL window), falling back to live CP connection state
 
 | Env | Default | Meaning |
 |-----|---------|---------|
-| `RT_API_URL` | `https://api.robotunnel.io` → migrating to `https://tunnel.robotunnel.io` | Tunnel base URL. Signaling/TURN URLs are derived from it. |
-| `RT_API_KEY` | — | `robot_api_key`. |
-| `RT_LISTEN_PORT` | `11411` | Local tunnel TCP port. |
-| `RT_WEBRTC_ENABLED` | `true` | Enable STUN/TURN path. |
-| `RT_AUTHORIZED_KEYS` | — | Comma-separated hex Ed25519 client keys. |
+| `ROBOAT_API_URL` | `https://api.robotunnel.io` → migrating to `https://tunnel.robotunnel.io` | Tunnel base URL. Signaling/TURN URLs are derived from it. |
+| `ROBOAT_API_KEY` | — | `robot_api_key`. |
+| `ROBOAT_LISTEN_PORT` | `11411` | Local tunnel TCP port. |
+| `ROBOAT_WEBRTC_ENABLED` | `true` | Enable STUN/TURN path. |
+| `ROBOAT_AUTHORIZED_KEYS` | — | Comma-separated hex Ed25519 client keys. |
 
 ## 8. Multiplexed connections (v0.3, Phase C)
 

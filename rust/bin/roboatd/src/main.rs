@@ -1,4 +1,4 @@
-use rt_daemon::{
+use roboat_daemon::{
     manager::{DaemonConfig, DaemonManager},
     server::IpcServer,
 };
@@ -14,27 +14,27 @@ async fn main() {
         )
         .init();
 
-    let socket_path = std::env::var("RT_DAEMON_SOCKET")
-        .unwrap_or_else(|_| "/var/run/robotunnel/rt.sock".to_string());
+    let socket_path = std::env::var("ROBOAT_SOCKET")
+        .unwrap_or_else(|_| "/var/run/roboat/roboatd.sock".to_string());
 
-    let listen_port: u16 = std::env::var("RT_DAEMON_LISTEN_PORT")
+    let listen_port: u16 = std::env::var("ROBOAT_LISTEN_PORT")
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(11411);
 
-    let insecure = std::env::var("RT_DAEMON_INSECURE")
+    let insecure = std::env::var("ROBOAT_INSECURE")
         .map(|v| matches!(v.to_lowercase().as_str(), "1" | "true" | "yes"))
         .unwrap_or(true);
 
     // Phase B: optional registry URL for agent discovery / heartbeat
-    let registry_url = std::env::var("RT_REGISTRY_URL").ok();
+    let registry_url = std::env::var("ROBOAT_REGISTRY_URL").ok();
 
     // Phase C: multiplexed connections (default on)
-    let use_mux = std::env::var("RT_DAEMON_USE_MUX")
+    let use_mux = std::env::var("ROBOAT_USE_MUX")
         .map(|v| !matches!(v.to_lowercase().as_str(), "0" | "false" | "no"))
         .unwrap_or(true);
 
-    let heartbeat_interval_secs: u64 = std::env::var("RT_HEARTBEAT_INTERVAL_SECS")
+    let heartbeat_interval_secs: u64 = std::env::var("ROBOAT_HEARTBEAT_INTERVAL_SECS")
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(30);
@@ -53,7 +53,7 @@ async fn main() {
     let server = IpcServer::new(socket_path.clone().into(), manager);
 
     tracing::info!(
-        "robotunneld socket={} tunnel_port={} use_mux={}",
+        "roboatd socket={} tunnel_port={} use_mux={}",
         socket_path,
         listen_port,
         use_mux,

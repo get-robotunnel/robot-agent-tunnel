@@ -1,0 +1,33 @@
+[Unit]
+Description=roboat daemon (roboatd)
+Documentation=https://github.com/get-robotunnel/roboat
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=roboat
+Group=roboat
+ExecStart=/usr/local/bin/roboatd
+Restart=on-failure
+RestartSec=5s
+
+# IPC socket directory
+RuntimeDirectory=roboat
+RuntimeDirectoryMode=0750
+
+# Environment
+EnvironmentFile=-/etc/roboat/daemon.env
+Environment=ROBOAT_SOCKET=/run/roboat/roboatd.sock
+Environment=ROBOAT_LISTEN_PORT=11411
+Environment=ROBOAT_INSECURE=false
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/run/roboat
+
+[Install]
+WantedBy=multi-user.target

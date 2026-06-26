@@ -5,7 +5,7 @@ const KNOWN_ROS_DISTROS: &[&str] = &["jazzy", "humble", "iron", "rolling", "gala
 
 pub fn ros_setup_script_path() -> Option<PathBuf> {
     for raw in [
-        env::var("RT_ROS_SETUP").ok(),
+        env::var("ROBOAT_ROS_SETUP").ok(),
         env::var("ROS_SETUP").ok(),
         env::var("AMENT_PREFIX_PATH")
             .ok()
@@ -84,7 +84,7 @@ mod tests {
 
     #[test]
     fn wrap_ros_shell_keeps_original_command_without_setup() {
-        std::env::remove_var("RT_ROS_SETUP");
+        std::env::remove_var("ROBOAT_ROS_SETUP");
         std::env::remove_var("ROS_SETUP");
         std::env::remove_var("ROS_DISTRO");
         std::env::remove_var("AMENT_PREFIX_PATH");

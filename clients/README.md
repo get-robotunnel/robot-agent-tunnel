@@ -1,13 +1,13 @@
-# RoboTunnel thin clients
+# roboat thin clients
 
 These libraries let agents in any language use the tunnel by connecting to the
-local `robotunneld` daemon socket. They contain **no transport code** — all tunnel
+local `roboatd` daemon socket. They contain **no transport code** — all tunnel
 complexity lives in the daemon.
 
 ## Architecture
 
 ```
-Agent (Python/Go/any) ── Unix socket ──► robotunneld ── TCP/WebRTC ──► remote daemon ──► remote agent
+Agent (Python/Go/any) ── Unix socket ──► roboatd ── TCP/WebRTC ──► remote daemon ──► remote agent
 ```
 
 Each library does exactly one thing: encode/decode the

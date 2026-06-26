@@ -1,4 +1,4 @@
-# Deploying the RoboTunnel Tunnel Service
+# Deploying the roboat tunnel service
 
 `tunnel-svc` runs on the shared VPS on port **8091**, behind Caddy at
 `tunnel.robotunnel.io`, as a separate systemd service from Robot Operations
@@ -13,7 +13,7 @@
    `PROD_SSH_HOST`, `PROD_SSH_PORT`, `PROD_SSH_USER`, `PROD_SSH_PRIVATE_KEY`,
    `PROD_SSH_KNOWN_HOSTS`.
 4. **Connection secrets** moved from the ops `.env` into the tunnel `.env`:
-   `TURN_SECRET`, `RT_AGENT_AUTH_SEED_HEX` (see the rotation note below — rotate
+   `TURN_SECRET`, `ROBOAT_AGENT_AUTH_SEED_HEX` (see the rotation note below — rotate
    while moving them), plus a fresh `INTERNAL_API_SECRET`
    (`openssl rand -hex 32`) shared with ops.
 
@@ -22,7 +22,7 @@
 ```bash
 # On the VPS, as root — one-time prep (config template + tunnel vhost):
 sudo ./bootstrap.sh
-sudo vi /opt/robotunnel-tunnel/config/.env    # fill DATABASE_URL, TURN_SECRET, RT_AGENT_AUTH_SEED_HEX, INTERNAL_API_SECRET
+sudo vi /opt/roboat/config/.env    # fill DATABASE_URL, TURN_SECRET, ROBOAT_AGENT_AUTH_SEED_HEX, INTERNAL_API_SECRET
 
 # Then deploy the binary (from GitHub → Actions → "Deploy Tunnel"), or by hand:
 #   GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o tunnel-svc ./cmd/tunnel-svc   (run in go/)
@@ -66,7 +66,7 @@ everything on a single Ubuntu VPS.
 |-----------|--------|-------------|
 | `tunnel-svc` | Go | 8091 (Caddy → tunnel.YOUR_DOMAIN) |
 | `robot-agent-registry` | Go | 8090 (Caddy → reg.YOUR_DOMAIN) |
-| `robotunneld` | Rust | 11411 (direct TCP, agent → agent) |
+| `roboatd` | Rust | 11411 (direct TCP, agent → agent) |
 | `coturn` | C | 3478 UDP/TCP, 5349 TLS |
 | `Caddy` | Go | 80, 443 (TLS termination) |
 
@@ -82,7 +82,7 @@ sudo -E bash deploy/self-host-full.sh
 
 # 3. Build and place the binaries (see script output for exact commands)
 #    then:
-sudo systemctl start robotunnel-tunnel robotunnel-registry robotunneld
+sudo systemctl start roboat roboar roboatd
 
 # 4. Verify
 curl https://tunnel.example.com/health
@@ -106,10 +106,10 @@ curl https://reg.example.com/health
 On the robot side, point the daemon at your self-hosted stack:
 
 ```bash
-# /etc/robotunnel/daemon.env (or add to the EnvironmentFile)
-RT_REGISTRY_URL=https://reg.example.com
-RT_DAEMON_LISTEN_PORT=11411
-RT_DAEMON_INSECURE=false
+# /etc/roboat/daemon.env (or add to the EnvironmentFile)
+ROBOAT_REGISTRY_URL=https://reg.example.com
+ROBOAT_LISTEN_PORT=11411
+ROBOAT_INSECURE=false
 ```
 
 In the agent IPC `listen` call, pass the registry token:
@@ -125,8 +125,8 @@ Dial other agents by `agent_id` — resolution is automatic:
 ## Security / rotation
 
 The tunnel now owns the connection secrets. When you move `TURN_SECRET` and
-`RT_AGENT_AUTH_SEED_HEX` out of the ops `.env`, **rotate them** (they were
-exposed in plaintext historically). Rotating `RT_AGENT_AUTH_SEED_HEX` changes
+`ROBOAT_AGENT_AUTH_SEED_HEX` out of the ops `.env`, **rotate them** (they were
+exposed in plaintext historically). Rotating `ROBOAT_AGENT_AUTH_SEED_HEX` changes
 `/api/agent-auth-public-key`; agents re-fetch it, so do it in a maintenance
-window. Keep all secrets in `/opt/robotunnel-tunnel/config/.env` (chmod 600),
+window. Keep all secrets in `/opt/roboat/config/.env` (chmod 600),
 never in git.

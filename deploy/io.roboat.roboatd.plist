@@ -4,20 +4,20 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.robotunnel.robotunneld</string>
+    <string>io.roboat.roboatd</string>
 
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/robotunneld</string>
+        <string>/usr/local/bin/roboatd</string>
     </array>
 
     <key>EnvironmentVariables</key>
     <dict>
-        <key>RT_DAEMON_SOCKET</key>
-        <string>/var/run/robotunnel/rt.sock</string>
-        <key>RT_DAEMON_LISTEN_PORT</key>
+        <key>ROBOAT_SOCKET</key>
+        <string>/var/run/roboat/roboatd.sock</string>
+        <key>ROBOAT_LISTEN_PORT</key>
         <string>11411</string>
-        <key>RT_DAEMON_INSECURE</key>
+        <key>ROBOAT_INSECURE</key>
         <string>false</string>
         <key>RUST_LOG</key>
         <string>info</string>
@@ -33,10 +33,10 @@
     </dict>
 
     <key>StandardOutPath</key>
-    <string>/var/log/robotunneld.log</string>
+    <string>/var/log/roboatd.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/var/log/robotunneld.log</string>
+    <string>/var/log/roboatd.log</string>
 
     <!-- Create socket directory before launch -->
     <key>UserName</key>

@@ -1,4 +1,4 @@
-# RoboTunnel Addressing — agent_id → tunnel endpoint resolution
+# roboat Addressing — agent_id → tunnel endpoint resolution
 
 Status: **Implemented (Phase B)** · License: Apache-2.0
 
@@ -77,9 +77,9 @@ public key (derived from the same seed used for tunnel auth).
 
 ---
 
-## 4. rt-resolver crate
+## 4. roboat-resolver crate
 
-`rust/crates/rt-resolver` implements two types:
+`rust/crates/roboat-resolver` implements two types:
 
 ### Resolver
 

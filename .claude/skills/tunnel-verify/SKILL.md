@@ -1,11 +1,11 @@
 ---
 name: tunnel-verify
-description: Build and verify the RoboTunnel tunnel service (Go tunnel-svc + Rust connection crates) locally. Use after changing anything under robotunnel-tunnel/ to confirm both implementations still build, vet, and test before pushing or deploying.
+description: Build and verify the roboat tunnel service (Go tunnel-svc + Rust connection crates) locally. Use after changing anything under roboat/ to confirm both implementations still build, vet, and test before pushing or deploying.
 ---
 
 # Verify the tunnel service
 
-Run from the repo root (`robotunnel-tunnel/`).
+Run from the repo root (`roboat/`).
 
 ## Go (tunnel-svc: signaling, TURN, CP/DP relay, internal API)
 
@@ -19,7 +19,7 @@ go test ./...
 `connstate` has unit tests; the rest are wired in `cmd/tunnel-svc`. A clean
 build + vet + green `connstate` tests is the bar for a structural change.
 
-## Rust (connection crates rt-core, rt-webrtc)
+## Rust (connection crates roboat-core, roboat-webrtc)
 
 ```bash
 cd rust

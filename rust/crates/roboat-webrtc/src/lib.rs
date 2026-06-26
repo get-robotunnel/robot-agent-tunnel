@@ -1,4 +1,4 @@
-//! rt-webrtc — WebRTC P2P connectivity for RoboTunnel Agent.
+//! roboat-webrtc — WebRTC P2P connectivity for roboat.
 //!
 //! # Connection Strategy
 //!

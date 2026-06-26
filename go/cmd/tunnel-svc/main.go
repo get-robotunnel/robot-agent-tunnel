@@ -83,7 +83,7 @@ func main() {
 		if b, derr := hex.DecodeString(h); derr == nil {
 			seed = b
 		} else {
-			log.Printf("[tunnel-svc] WARNING: invalid RT_AGENT_AUTH_SEED_HEX: %v", derr)
+			log.Printf("[tunnel-svc] WARNING: invalid ROBOAT_AGENT_AUTH_SEED_HEX: %v", derr)
 		}
 	}
 	relaySvc := relay.NewServer(resolver, seed)

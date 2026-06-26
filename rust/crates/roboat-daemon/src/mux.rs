@@ -16,7 +16,7 @@ use std::{
     },
 };
 
-use rt_core::protocol::{read_frame, write_frame, FrameType, ProtocolError};
+use roboat_core::protocol::{read_frame, write_frame, FrameType, ProtocolError};
 use thiserror::Error;
 use tokio::{
     net::tcp::{OwnedReadHalf, OwnedWriteHalf},

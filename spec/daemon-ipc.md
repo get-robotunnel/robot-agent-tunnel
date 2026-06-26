@@ -1,11 +1,11 @@
-# RoboTunnel Daemon IPC Protocol — v0.2
+# roboat Daemon IPC Protocol — v0.2
 
 Status: **Stable** · License: Apache-2.0
 
-This document defines the local IPC protocol between a **daemon** (`robotunneld`)
+This document defines the local IPC protocol between a **daemon** (`roboatd`)
 and **agent processes** (in any language) running on the same machine.
 
-The daemon (`robotunneld`) is the single component that owns all tunnel complexity:
+The daemon (`roboatd`) is the single component that owns all tunnel complexity:
 NAT traversal, Ed25519 auth, WebRTC, connection management, and (in Phase B)
 registry address resolution. Agent processes communicate with it via a local Unix
 socket using this protocol.
@@ -16,9 +16,9 @@ socket using this protocol.
 
 | Property | Value |
 |----------|-------|
-| Default socket path (Unix) | `/var/run/robotunnel/rt.sock` |
-| Windows | `\\.\pipe\robotunnel` (future) |
-| Override | `RT_DAEMON_SOCKET` environment variable |
+| Default socket path (Unix) | `/var/run/roboat/roboatd.sock` |
+| Windows | `\\.\pipe\roboat` (future) |
+| Override | `ROBOAT_SOCKET` environment variable |
 | Frame format | `[length: u32 big-endian][JSON payload: bytes]` |
 | Max frame size | 4 MiB |
 | Authentication | Local only (UNIX socket permissions); future: local token file |
@@ -67,7 +67,7 @@ connection.
 `stream_class` values: `"control"` (default), `"meta"`, `"bulk"`.
 
 In Phase A/direct mode, `target_agent_id` is parsed as `host:port`. Starting in
-Phase B, an `agt_xxx` target is resolved by `rt-resolver` via the registry
+Phase B, an `agt_xxx` target is resolved by `roboat-resolver` via the registry
 discovery API before dialing.
 
 #### `send`
@@ -123,12 +123,12 @@ A stream is closed when:
 
 ## 4. Wire handshake for daemon↔daemon connections
 
-This describes what `robotunneld` does internally; implementers of the daemon
+This describes what `roboatd` does internally; implementers of the daemon
 do not need to implement this (use the thin client library instead).
 
 ```
 TCP connect
-  └─► Ed25519 nonce-challenge (rt-core §3.1)
+  └─► Ed25519 nonce-challenge (roboat-core §3.1)
       └─► RelayOpen  [stream_id:u32 BE][class:u8]
           └─► RelayOpenAck [echo of RelayOpen payload]
               └─► RelayData / RelayData / ... (bidirectional)
@@ -144,12 +144,12 @@ ack. Responder-side IPC `stream_id` is derived from this wire value.
 
 | Env var | Default | Meaning |
 |---------|---------|---------|
-| `RT_DAEMON_SOCKET` | `/var/run/robotunnel/rt.sock` | IPC socket path. |
-| `RT_DAEMON_LISTEN_PORT` | `11411` | TCP port for inbound tunnel connections. |
-| `RT_DAEMON_INSECURE` | `true` | Accept any valid Ed25519 key (dev). Set `false` in production with an allowlist. |
-| `RT_REGISTRY_URL` | — | Phase B: registry base URL (e.g. `https://reg.robotunnel.io`). |
-| `RT_DAEMON_USE_MUX` | `true` | Phase C: use multiplexed connections (StreamOpen/Data/Close frames). |
-| `RT_HEARTBEAT_INTERVAL_SECS` | `30` | Registry heartbeat interval in seconds. |
+| `ROBOAT_SOCKET` | `/var/run/roboat/roboatd.sock` | IPC socket path. |
+| `ROBOAT_LISTEN_PORT` | `11411` | TCP port for inbound tunnel connections. |
+| `ROBOAT_INSECURE` | `true` | Accept any valid Ed25519 key (dev). Set `false` in production with an allowlist. |
+| `ROBOAT_REGISTRY_URL` | — | Phase B: registry base URL (e.g. `https://reg.robotunnel.io`). |
+| `ROBOAT_USE_MUX` | `true` | Phase C: use multiplexed connections (StreamOpen/Data/Close frames). |
+| `ROBOAT_HEARTBEAT_INTERVAL_SECS` | `30` | Registry heartbeat interval in seconds. |
 
 ---
 

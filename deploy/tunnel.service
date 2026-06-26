@@ -1,17 +1,17 @@
 [Unit]
-Description=RoboTunnel Tunnel Service (connection layer)
+Description=roboat tunnel service (connection layer)
 After=network.target
 
 [Service]
 Type=simple
-User=robotunnel
-WorkingDirectory=/opt/robotunnel-tunnel
-ExecStart=/opt/robotunnel-tunnel/bin/tunnel-svc
+User=roboat
+WorkingDirectory=/opt/roboat
+ExecStart=/opt/roboat/bin/tunnel-svc
 Restart=always
 RestartSec=5
-EnvironmentFile=/opt/robotunnel-tunnel/config/.env
-StandardOutput=append:/var/log/robotunnel-tunnel.log
-StandardError=append:/var/log/robotunnel-tunnel.log
+EnvironmentFile=/opt/roboat/config/.env
+StandardOutput=append:/var/log/roboat.log
+StandardError=append:/var/log/roboat.log
 
 [Install]
 WantedBy=multi-user.target

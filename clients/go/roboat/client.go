@@ -1,11 +1,11 @@
-// Package roboat provides a thin Go client for the robotunneld local IPC socket.
+// Package roboat provides a thin Go client for the roboatd local IPC socket.
 //
 // Frame format: [uint32 big-endian length][JSON bytes]
 // Binary data is base64-encoded within JSON payloads.
 //
 // Usage:
 //
-//	rt, err := roboat.NewDaemon("/var/run/robotunnel/rt.sock")
+//	rt, err := roboat.NewDaemon("/var/run/roboat/roboatd.sock")
 //	stream, err := rt.Dial("127.0.0.1:11411", "control")
 //	stream.Send([]byte("hello"))
 //	data, err := stream.Recv()
@@ -23,10 +23,10 @@ import (
 	"sync/atomic"
 )
 
-const defaultSocket = "/var/run/robotunnel/rt.sock"
+const defaultSocket = "/var/run/roboat/roboatd.sock"
 const maxMsgSize = 4 * 1024 * 1024
 
-// Daemon is a connection to a local robotunneld IPC socket.
+// Daemon is a connection to a local roboatd IPC socket.
 type Daemon struct {
 	conn    net.Conn
 	mu      sync.Mutex // guards writes
@@ -51,8 +51,8 @@ type Stream struct {
 	recvQueue   chan []byte
 }
 
-// NewDaemon connects to the robotunneld IPC socket at socketPath.
-// Pass an empty string to use the default path (/var/run/robotunnel/rt.sock).
+// NewDaemon connects to the roboatd IPC socket at socketPath.
+// Pass an empty string to use the default path (/var/run/roboat/roboatd.sock).
 func NewDaemon(socketPath string) (*Daemon, error) {
 	if socketPath == "" {
 		socketPath = defaultSocket

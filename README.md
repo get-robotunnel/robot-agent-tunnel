@@ -1,4 +1,4 @@
-# RoboTunnel Tunnel
+# roboat
 
 **Agent-to-agent tunneling for robots.** Connect any two robot agents directly —
 across NAT, firewalls, and networks — with automatic path selection and zero
@@ -10,7 +10,7 @@ Apache-2.0 · [Robot Agent Registry](https://reg.robotunnel.io) · [Docs](spec/)
 
 ## What this is
 
-A daemon (`robotunneld`) runs alongside your agent process. Agents talk to it
+A daemon (`roboatd`) runs alongside your agent process. Agents talk to it
 over a local Unix socket using a simple JSON IPC protocol. The daemon handles
 everything else: Ed25519 authentication, NAT traversal, connection multiplexing,
 and (optionally) registry-based discovery so agents find each other by ID rather
@@ -22,9 +22,9 @@ robot A                          robot B
 your code                        your code
    │  IPC (Unix socket)             │  IPC
    ▼                                ▼
-robotunneld ── Ed25519 TCP ──► robotunneld
+roboatd ── Ed25519 TCP ──► roboatd
    │                                │
-rt-resolver ◄── GET /discover ──► registry
+roboat-resolver ◄── GET /discover ──► registry
 ```
 
 Path selection: **LAN TCP → public TCP → STUN P2P → TURN relay**.
@@ -37,14 +37,14 @@ Path selection: **LAN TCP → public TCP → STUN P2P → TURN relay**.
 
 ```bash
 # From source
-cargo build --release -p robotunneld
-./target/release/robotunneld
+cargo build --release -p roboatd
+./target/release/roboatd
 
 # Or with registry discovery enabled
-RT_REGISTRY_URL=https://reg.robotunnel.io ./target/release/robotunneld
+ROBOAT_REGISTRY_URL=https://reg.robotunnel.io ./target/release/roboatd
 ```
 
-Default socket: `/var/run/robotunnel/rt.sock`  
+Default socket: `/var/run/roboat/roboatd.sock`  
 Default TCP port: `11411`
 
 ### 2. Connect from your agent
@@ -98,18 +98,18 @@ spec/
   daemon-ipc.md        Local IPC protocol v0.2
   addressing.md        agent_id → tunnel_endpoint resolution
 rust/
-  crates/rt-core       Protocol framing + Ed25519 auth
-  crates/rt-daemon     Daemon manager + IPC server + mux
-  crates/rt-resolver   Registry discovery + heartbeat
-  crates/rt-webrtc     WebRTC path (STUN/TURN)
-  bin/robotunneld      Daemon binary
+  crates/roboat-core       Protocol framing + Ed25519 auth
+  crates/roboat-daemon     Daemon manager + IPC server + mux
+  crates/roboat-resolver   Registry discovery + heartbeat
+  crates/roboat-webrtc     WebRTC path (STUN/TURN)
+  bin/roboatd          Daemon binary
 clients/
   python/roboat        Async Python client (pip install roboat)
   go/roboat            Go client module
 examples/
   agent-to-agent/      Python responder + Go initiator demo
 deploy/
-  robotunneld.service  systemd unit
+  roboatd.service      systemd unit
   coturn.conf          TURN server reference config
   self-host-full.sh    One-click self-hosted stack (daemon + registry + TURN)
   README.md            Deploy guide
@@ -121,12 +121,12 @@ deploy/
 
 | Env var | Default | Meaning |
 |---------|---------|---------|
-| `RT_DAEMON_SOCKET` | `/var/run/robotunnel/rt.sock` | IPC socket path |
-| `RT_DAEMON_LISTEN_PORT` | `11411` | TCP port for inbound connections |
-| `RT_DAEMON_INSECURE` | `true` | Accept any valid Ed25519 key (dev mode) |
-| `RT_REGISTRY_URL` | — | Registry URL for agent discovery / heartbeat |
-| `RT_DAEMON_USE_MUX` | `true` | Multiplex streams over one TCP connection |
-| `RT_HEARTBEAT_INTERVAL_SECS` | `30` | Registry heartbeat interval |
+| `ROBOAT_SOCKET` | `/var/run/roboat/roboatd.sock` | IPC socket path |
+| `ROBOAT_LISTEN_PORT` | `11411` | TCP port for inbound connections |
+| `ROBOAT_INSECURE` | `true` | Accept any valid Ed25519 key (dev mode) |
+| `ROBOAT_REGISTRY_URL` | — | Registry URL for agent discovery / heartbeat |
+| `ROBOAT_USE_MUX` | `true` | Multiplex streams over one TCP connection |
+| `ROBOAT_HEARTBEAT_INTERVAL_SECS` | `30` | Registry heartbeat interval |
 
 ---
 
@@ -154,7 +154,7 @@ export DOMAIN=example.com ADMIN_EMAIL=you@example.com
 sudo -E bash deploy/self-host-full.sh
 ```
 
-Installs: `tunnel-svc` (signaling/relay), `robot-agent-registry`, `robotunneld`,
+Installs: `tunnel-svc` (signaling/relay), `robot-agent-registry`, `roboatd`,
 `coturn` (TURN), and `Caddy` (TLS). See [`deploy/README.md`](deploy/README.md).
 
 ---

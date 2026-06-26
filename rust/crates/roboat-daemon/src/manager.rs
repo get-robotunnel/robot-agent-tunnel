@@ -19,11 +19,11 @@ use crate::{
     ipc::StreamClass,
     mux::{IncomingMuxStream, MuxConn},
 };
-use rt_core::{
+use roboat_core::{
     auth::{ClientAuthenticator, ServerAuthenticator},
     protocol::{read_frame, write_frame, FrameType, ProtocolError},
 };
-use rt_resolver::{detect_local_ip, Registrar, Resolver};
+use roboat_resolver::{detect_local_ip, Registrar, Resolver};
 use std::{
     collections::HashMap,
     sync::{
@@ -49,7 +49,7 @@ pub enum DaemonError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
     #[error("Auth error: {0}")]
-    Auth(#[from] rt_core::auth::AuthError),
+    Auth(#[from] roboat_core::auth::AuthError),
     #[error("Protocol error: {0}")]
     Protocol(#[from] ProtocolError),
     #[error("Stream {0} not found")]
@@ -81,7 +81,7 @@ impl Default for DaemonConfig {
     fn default() -> Self {
         Self {
             listen_port: 11411,
-            socket_path: "/var/run/robotunnel/rt.sock".to_string(),
+            socket_path: "/var/run/roboat/roboatd.sock".to_string(),
             insecure_allow_any_client: true,
             auth_seed: [0u8; 32],
             registry_url: None,
@@ -204,7 +204,7 @@ impl DaemonManager {
         let registry_url = match &self.config.registry_url {
             Some(url) => url.clone(),
             None => {
-                tracing::warn!("daemon: no RT_REGISTRY_URL; skipping heartbeat");
+                tracing::warn!("daemon: no ROBOAT_REGISTRY_URL; skipping heartbeat");
                 return;
             }
         };

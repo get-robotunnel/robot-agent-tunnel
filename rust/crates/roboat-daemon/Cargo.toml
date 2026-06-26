@@ -1,14 +1,14 @@
 [package]
-name = "rt-daemon"
+name = "roboat-daemon"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-repository = "https://github.com/get-robotunnel/robot-agent-tunnel"
-description = "RoboTunnel daemon — exposes tunnel connectivity via local IPC socket"
+repository = "https://github.com/get-robotunnel/roboat"
+description = "roboat daemon — exposes tunnel connectivity via local IPC socket"
 
 [dependencies]
-rt-core = { path = "../rt-core" }
-rt-resolver = { path = "../rt-resolver" }
+roboat-core = { path = "../roboat-core" }
+roboat-resolver = { path = "../roboat-resolver" }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

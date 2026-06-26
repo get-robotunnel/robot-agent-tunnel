@@ -1,4 +1,4 @@
-//! Configuration loading for the RoboTunnel agent.
+//! Configuration loading for the roboat daemon.
 
 use serde::Deserialize;
 use std::path::Path;
@@ -46,7 +46,7 @@ pub struct ServerConfig {
 pub struct PlatformConfig {
     #[serde(default = "default_api_url")]
     pub api_url: String,
-    /// Robot API key. Can also be set via RT_API_KEY env var.
+    /// Robot API key. Can also be set via ROBOAT_API_KEY env var.
     pub api_key: Option<String>,
 }
 
@@ -165,18 +165,18 @@ impl AgentConfig {
 
     /// Apply environment variable overrides.
     pub fn apply_env_overrides(&mut self) {
-        if let Ok(key) = std::env::var("RT_API_KEY") {
+        if let Ok(key) = std::env::var("ROBOAT_API_KEY") {
             self.platform.api_key = Some(key);
         }
-        if let Ok(url) = std::env::var("RT_API_URL") {
+        if let Ok(url) = std::env::var("ROBOAT_API_URL") {
             self.platform.api_url = url;
         }
-        if let Ok(port) = std::env::var("RT_LISTEN_PORT") {
+        if let Ok(port) = std::env::var("ROBOAT_LISTEN_PORT") {
             if let Ok(p) = port.parse() {
                 self.server.listen_port = p;
             }
         }
-        if let Ok(keys) = std::env::var("RT_AUTHORIZED_KEYS") {
+        if let Ok(keys) = std::env::var("ROBOAT_AUTHORIZED_KEYS") {
             self.server.authorized_keys = keys
                 .split(',')
                 .map(str::trim)
@@ -184,22 +184,22 @@ impl AgentConfig {
                 .map(ToOwned::to_owned)
                 .collect();
         }
-        if let Ok(v) = std::env::var("RT_INSECURE_ALLOW_ANY_CLIENT") {
+        if let Ok(v) = std::env::var("ROBOAT_INSECURE_ALLOW_ANY_CLIENT") {
             self.server.insecure_allow_any_client = parse_bool(&v);
         }
-        if let Ok(level) = std::env::var("RT_LOG_LEVEL") {
+        if let Ok(level) = std::env::var("ROBOAT_LOG_LEVEL") {
             self.logging.level = level;
         }
-        if let Ok(enabled) = std::env::var("RT_WEBRTC_ENABLED") {
+        if let Ok(enabled) = std::env::var("ROBOAT_WEBRTC_ENABLED") {
             let v = enabled.to_lowercase();
             self.webrtc.enabled = matches!(v.as_str(), "1" | "true" | "yes" | "on");
         }
-        if let Ok(robot_id) = std::env::var("RT_ROBOT_ID") {
+        if let Ok(robot_id) = std::env::var("ROBOAT_ROBOT_ID") {
             if !robot_id.trim().is_empty() {
                 self.webrtc.robot_id = Some(robot_id);
             }
         }
-        if let Ok(timeout) = std::env::var("RT_WEBRTC_STUN_TIMEOUT_SECS") {
+        if let Ok(timeout) = std::env::var("ROBOAT_WEBRTC_STUN_TIMEOUT_SECS") {
             if let Ok(v) = timeout.parse() {
                 self.webrtc.stun_timeout_secs = v;
             }

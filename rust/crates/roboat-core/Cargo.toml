@@ -1,10 +1,10 @@
 [package]
-name = "rt-core"
+name = "roboat-core"
 version = "0.2.0"
 edition = "2021"
 license = "Apache-2.0"
-repository = "https://github.com/get-robotunnel/robotunnel-tunnel"
-description = "RoboTunnel core connection layer — tunnel, auth, heartbeat"
+repository = "https://github.com/get-robotunnel/roboat"
+description = "roboat core connection layer — tunnel, auth, heartbeat"
 
 [dependencies]
 tokio = { version = "1", features = ["net", "io-util", "sync", "time", "macros", "rt"] }

@@ -88,14 +88,14 @@ pub async fn connect(
             if turn_creds.turn_available {
                 if let Some(turn) = turn_creds.turn {
                     let filtered_turn_urls = filter_supported_turn_urls(&turn.urls);
-                    let tcp_enabled = env_flag_enabled_with_default("RT_WEBRTC_TCP_ENABLED", false);
+                    let tcp_enabled = env_flag_enabled_with_default("ROBOAT_WEBRTC_TCP_ENABLED", false);
                     for raw in &turn.urls {
                         if is_supported_turn_url(raw, tcp_enabled) {
                             continue;
                         }
                         match turn_url_transport(raw) {
                             Some(TurnUrlTransport::Tcp) => warn!(
-                                "WebRTC: dropping TCP TURN URL because RT_WEBRTC_TCP_ENABLED=false: {}",
+                                "WebRTC: dropping TCP TURN URL because ROBOAT_WEBRTC_TCP_ENABLED=false: {}",
                                 raw
                             ),
                             _ => warn!(
@@ -506,7 +506,7 @@ fn route_requires_relay(cfg: &WebRtcConfig) -> bool {
             return true;
         }
     }
-    env_flag_enabled_with_default("RT_WEBRTC_FORCE_RELAY", false)
+    env_flag_enabled_with_default("ROBOAT_WEBRTC_FORCE_RELAY", false)
 }
 
 fn resolve_parallel_connect_timeout(cfg: &WebRtcConfig) -> Duration {
@@ -515,7 +515,7 @@ fn resolve_parallel_connect_timeout(cfg: &WebRtcConfig) -> Duration {
     const TOTAL_WINDOW_SECS: u64 = FIRST_WINDOW_SECS + EXTRA_WINDOW_SECS;
 
     let mut secs = cfg.stun_timeout_secs;
-    if let Ok(raw) = std::env::var("RT_WEBRTC_CONNECT_TIMEOUT_SECS") {
+    if let Ok(raw) = std::env::var("ROBOAT_WEBRTC_CONNECT_TIMEOUT_SECS") {
         if let Ok(parsed) = raw.trim().parse::<u64>() {
             secs = parsed;
         }
@@ -537,7 +537,7 @@ fn resolve_datachannel_open_grace() -> Duration {
     const MAX_GRACE_SECS: u64 = 12;
 
     let mut secs = DEFAULT_GRACE_SECS;
-    if let Ok(raw) = std::env::var("RT_WEBRTC_DC_OPEN_GRACE_SECS") {
+    if let Ok(raw) = std::env::var("ROBOAT_WEBRTC_DC_OPEN_GRACE_SECS") {
         if let Ok(parsed) = raw.trim().parse::<u64>() {
             secs = parsed;
         }
@@ -552,8 +552,8 @@ fn resolve_datachannel_open_grace() -> Duration {
 }
 
 fn ice_network_types_for_servers(ice_servers: &[RTCIceServer]) -> Vec<NetworkType> {
-    let ipv6_enabled = env_flag_enabled("RT_WEBRTC_IPV6_ENABLED");
-    let tcp_enabled = env_flag_enabled_with_default("RT_WEBRTC_TCP_ENABLED", false);
+    let ipv6_enabled = env_flag_enabled("ROBOAT_WEBRTC_IPV6_ENABLED");
+    let tcp_enabled = env_flag_enabled_with_default("ROBOAT_WEBRTC_TCP_ENABLED", false);
     let needs_tcp = tcp_enabled
         && ice_servers
             .iter()
@@ -599,8 +599,8 @@ fn parse_bool_like(value: &str) -> bool {
 }
 
 fn filter_supported_turn_urls(urls: &[String]) -> Vec<String> {
-    let tcp_enabled = env_flag_enabled_with_default("RT_WEBRTC_TCP_ENABLED", false);
-    let tls_only = tcp_enabled && env_flag_enabled_with_default("RT_WEBRTC_TURN_TLS_ONLY", false);
+    let tcp_enabled = env_flag_enabled_with_default("ROBOAT_WEBRTC_TCP_ENABLED", false);
+    let tls_only = tcp_enabled && env_flag_enabled_with_default("ROBOAT_WEBRTC_TURN_TLS_ONLY", false);
     let mut expanded: Vec<(String, bool)> = Vec::new();
     for raw in urls {
         let turns_origin = raw.trim().to_ascii_lowercase().starts_with("turns:");
@@ -623,13 +623,13 @@ fn filter_supported_turn_urls(urls: &[String]) -> Vec<String> {
         }
         if !out.is_empty() {
             info!(
-                "WebRTC: RT_WEBRTC_TURN_TLS_ONLY active; using TLS TURN candidates only ({})",
+                "WebRTC: ROBOAT_WEBRTC_TURN_TLS_ONLY active; using TLS TURN candidates only ({})",
                 out.join(", ")
             );
             return out;
         }
         warn!(
-            "WebRTC: RT_WEBRTC_TURN_TLS_ONLY active but no TLS TURN candidate found; falling back to full supported TURN candidate set"
+            "WebRTC: ROBOAT_WEBRTC_TURN_TLS_ONLY active but no TLS TURN candidate found; falling back to full supported TURN candidate set"
         );
     }
 
@@ -643,8 +643,8 @@ fn filter_supported_turn_urls(urls: &[String]) -> Vec<String> {
 
 #[cfg(test)]
 fn clear_turn_env_for_test() {
-    std::env::remove_var("RT_WEBRTC_TCP_ENABLED");
-    std::env::remove_var("RT_WEBRTC_TURN_TLS_ONLY");
+    std::env::remove_var("ROBOAT_WEBRTC_TCP_ENABLED");
+    std::env::remove_var("ROBOAT_WEBRTC_TURN_TLS_ONLY");
 }
 
 #[cfg(test)]
@@ -665,8 +665,8 @@ mod turn_filter_tests {
     #[test]
     fn test_filter_supported_turn_urls_default_keeps_all_supported_candidates() {
         clear_turn_env_for_test();
-        set_env_for_test("RT_WEBRTC_TCP_ENABLED", "1");
-        set_env_for_test("RT_WEBRTC_TURN_TLS_ONLY", "0");
+        set_env_for_test("ROBOAT_WEBRTC_TCP_ENABLED", "1");
+        set_env_for_test("ROBOAT_WEBRTC_TURN_TLS_ONLY", "0");
         let urls = vec![
             "turn:turn.robotunnel.io:3478".to_string(),
             "turns:turn.robotunnel.io:5349".to_string(),
@@ -684,8 +684,8 @@ mod turn_filter_tests {
     #[test]
     fn test_filter_supported_turn_urls_tls_only_can_be_enabled() {
         clear_turn_env_for_test();
-        set_env_for_test("RT_WEBRTC_TCP_ENABLED", "1");
-        set_env_for_test("RT_WEBRTC_TURN_TLS_ONLY", "1");
+        set_env_for_test("ROBOAT_WEBRTC_TCP_ENABLED", "1");
+        set_env_for_test("ROBOAT_WEBRTC_TURN_TLS_ONLY", "1");
         let urls = vec![
             "turn:turn.robotunnel.io:3478".to_string(),
             "turns:turn.robotunnel.io:5349".to_string(),
@@ -742,7 +742,7 @@ mod tests {
 
     #[test]
     fn test_ice_network_types_include_tcp_when_turn_tcp_present() {
-        std::env::set_var("RT_WEBRTC_TCP_ENABLED", "1");
+        std::env::set_var("ROBOAT_WEBRTC_TCP_ENABLED", "1");
         let servers = vec![RTCIceServer {
             urls: vec!["turn:turn.robotunnel.io:3478?transport=tcp".to_string()],
             ..Default::default()
@@ -750,7 +750,7 @@ mod tests {
         let types = ice_network_types_for_servers(&servers);
         assert!(types.contains(&NetworkType::Udp4));
         assert!(types.contains(&NetworkType::Tcp4));
-        std::env::remove_var("RT_WEBRTC_TCP_ENABLED");
+        std::env::remove_var("ROBOAT_WEBRTC_TCP_ENABLED");
     }
 
     #[test]

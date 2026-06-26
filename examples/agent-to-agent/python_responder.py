@@ -3,11 +3,11 @@
 Responder agent (Python): waits for a connection, receives a message, replies.
 
 Prerequisites:
-  - robotunneld running on /tmp/rt-responder.sock with RT_DAEMON_LISTEN_PORT=11412
+  - roboatd running on /tmp/roboat-responder.sock with ROBOAT_LISTEN_PORT=11412
   - Run before go_initiator
 
 Usage:
-  RT_DAEMON_SOCKET=/tmp/rt-responder.sock python3 python_responder.py
+  ROBOAT_SOCKET=/tmp/roboat-responder.sock python3 python_responder.py
 """
 
 import asyncio
@@ -20,7 +20,7 @@ from roboat import Daemon
 
 
 async def main():
-    socket = os.environ.get("RT_DAEMON_SOCKET", "/tmp/rt-responder.sock")
+    socket = os.environ.get("ROBOAT_SOCKET", "/tmp/roboat-responder.sock")
     rt = Daemon(socket_path=socket)
     await rt.connect()
 

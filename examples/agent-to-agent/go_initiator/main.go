@@ -1,8 +1,8 @@
 // go_initiator: sends a message to the python_responder through two daemon instances.
 //
 // Prerequisites:
-//   - robotunneld on /tmp/rt-initiator.sock (RT_DAEMON_LISTEN_PORT=11411)
-//   - robotunneld on /tmp/rt-responder.sock (RT_DAEMON_LISTEN_PORT=11412)
+//   - roboatd on /tmp/roboat-initiator.sock (ROBOAT_LISTEN_PORT=11411)
+//   - roboatd on /tmp/roboat-responder.sock (ROBOAT_LISTEN_PORT=11412)
 //   - python_responder.py running and listening
 //
 // Usage:
@@ -19,9 +19,9 @@ import (
 )
 
 func main() {
-	socketPath := os.Getenv("RT_DAEMON_SOCKET")
+	socketPath := os.Getenv("ROBOAT_SOCKET")
 	if socketPath == "" {
-		socketPath = "/tmp/rt-initiator.sock"
+		socketPath = "/tmp/roboat-initiator.sock"
 	}
 
 	target := "127.0.0.1:11412"

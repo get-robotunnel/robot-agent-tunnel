@@ -41,6 +41,16 @@ plus a path-strangler on `api.robotunnel.io` so already-deployed agents cut over
 with no client change. Rollback = flip the Caddy routes back to ops `:8080`.
 Reference scripts in `deploy/`.
 
+**Live:** deployed at `tunnel.robotunnel.io` on the shared VPS `92.5.43.70`
+(Oracle Linux 9.7, **aarch64**; `ssh -i .ssh/vps.key opc@92.5.43.70`), unit
+`roboat`, dir `/opt/roboat`, source `/opt/src/roboat`, native Postgres (db
+`roboat`). Only Caddyfile **Part A** (`tunnel.robotunnel.io→8091`) is applied —
+the `api.robotunnel.io` strangler is NOT enabled; the old ops `:8080` keeps
+serving `api.` unchanged (coexist). TURN/coturn is not yet deployed (`TURN_HOST`
+unset) — relay-only NAT traversal for now; add coturn when symmetric-NAT peers
+need it. `deploy/.env` carries a committed `INTERNAL_API_SECRET` — the live box
+uses a fresh one; rotate/untrack the committed value.
+
 ## Security
 
 Connection secrets (`ROBOAT_AGENT_AUTH_SEED_HEX`, `TURN_SECRET`, the tunnel
